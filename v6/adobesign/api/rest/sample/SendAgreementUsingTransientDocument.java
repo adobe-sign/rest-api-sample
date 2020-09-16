@@ -11,6 +11,8 @@
 
 package adobesign.api.rest.sample;
 
+import adobesign.api.rest.sample.util.RestApiUserGroups;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import adobesign.api.rest.sample.util.RestApiAgreements;
@@ -79,13 +81,37 @@ public class SendAgreementUsingTransientDocument {
     // Fetch oauth access token to make further API calls.
     String accessToken = RestApiOAuthTokens.getOauthAccessToken(authRequestJSONFileName);
 
+    // get all active groups of the user
+    JSONObject userGroups = RestApiUserGroups.getUserGroups(accessToken);
+    JSONArray userGroupsList = (JSONArray) userGroups.get("groupInfoList");
+
+    // select the first group the user can send from
+    String groupId = null;
+    for (Object eachUserGroup : userGroupsList) {
+      JSONObject userGroup = (JSONObject) eachUserGroup;
+      String groupStatus = (String) userGroup.get("status");
+      JSONObject groupSettings = (JSONObject) userGroup.get("settings");
+      JSONObject userCanSend = (JSONObject) groupSettings.get("userCanSend");
+      Boolean userCanSendValue = (Boolean) userCanSend.get("value");
+      if (groupStatus.equals("ACTIVE") && userCanSendValue) {
+        groupId = userGroup.get("id").toString();
+        break;
+      }
+    }
+
+    // no group with send permissions was found
+    if (groupId == null){
+      System.err.println("No Group the user can send from");
+      return;
+    }
+
     // Upload a transient document and retrieve transient document ID from the response.
     JSONObject uploadDocumentResponse = RestApiAgreements.postTransientDocument(accessToken, mimeType, fileToBeUploaded, uploadedFileName);
     String transientDocumentId = (String) uploadDocumentResponse.get("transientDocumentId");
 
     // Send an agreement using the transient document ID derived from above.
     DocumentIdentifierName idName = DocumentIdentifierName.TRANSIENT_DOCUMENT_ID;
-    JSONObject sendAgreementResponse = RestApiAgreements.sendAgreement(accessToken, sendAgreementJSONFileName, transientDocumentId, null, idName);
+    JSONObject sendAgreementResponse = RestApiAgreements.sendAgreement(accessToken, sendAgreementJSONFileName, transientDocumentId, groupId, idName);
 
     // Parse and read response.
     System.out.println("Agreement Sent. Agreement ID = " + sendAgreementResponse.get("id"));

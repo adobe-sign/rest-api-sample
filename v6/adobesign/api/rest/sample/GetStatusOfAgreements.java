@@ -61,6 +61,7 @@ public class GetStatusOfAgreements {
         System.out.println("AgreementName: " + agreement.get("name"));
         System.out.println("AgreementID: " + agreement.get("id"));
         System.out.println("AgreementStatus: " + agreement.get("status"));
+        System.out.println("GroupID: " + agreement.get("groupId"));
         System.out.println();
       }
     }
