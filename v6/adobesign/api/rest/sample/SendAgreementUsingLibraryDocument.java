@@ -14,6 +14,7 @@ package adobesign.api.rest.sample;
 import adobesign.api.rest.sample.util.RestApiAgreements;
 import adobesign.api.rest.sample.util.RestApiLibraryDocuments;
 import adobesign.api.rest.sample.util.RestApiOAuthTokens;
+import adobesign.api.rest.sample.util.RestApiUserGroups;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -58,14 +59,37 @@ public class SendAgreementUsingLibraryDocument {
     // Fetch oauth access token to make further API calls.
     String accessToken = RestApiOAuthTokens.getOauthAccessToken(authRequestJSONFileName);
 
+    // get all active groups of the user
+    JSONObject userGroups = RestApiUserGroups.getUserGroups(accessToken);
+    JSONArray userGroupsList = (JSONArray) userGroups.get("groupInfoList");
+
+    // select the first group the user can send from
+    String groupId = null;
+    for (Object eachUserGroup : userGroupsList) {
+      JSONObject userGroup = (JSONObject) eachUserGroup;
+      String groupStatus = (String) userGroup.get("status");
+      JSONObject groupSettings = (JSONObject) userGroup.get("settings");
+      JSONObject userCanSend = (JSONObject) groupSettings.get("userCanSend");
+      Boolean userCanSendValue = (Boolean) userCanSend.get("value");
+      if (groupStatus.equals("ACTIVE") && userCanSendValue) {
+        groupId = userGroup.get("id").toString();
+        break;
+      }
+    }
+
+    // no group with send permissions was found
+    if (groupId == null){
+      System.err.println("No Group the user can send from");
+      return;
+    }
+
     // Fetch library documents of the user using access token from above.
-    JSONObject libraryDocumentsResponse = RestApiLibraryDocuments.getLibraryDocuments(accessToken);
+    JSONObject libraryDocumentsResponse = RestApiLibraryDocuments.getLibraryDocuments(accessToken, groupId);
 
     // Retrieve library documents list for the user and fetch the ID of first library document.
     JSONArray libraryDocumentList = (JSONArray) libraryDocumentsResponse.get("libraryDocumentList");
-    
+
     String libraryDocumentId = null;
-    
     // Fetch the first personal or shared library document of the user.
     for (Object eachLibraryDocument : libraryDocumentList) {
       JSONObject libraryDocument = (JSONObject) eachLibraryDocument;
@@ -77,7 +101,7 @@ public class SendAgreementUsingLibraryDocument {
     
     if (libraryDocumentId != null && !libraryDocumentId.isEmpty()) {
       // Send agreement using this library document ID retrieved from above.
-      JSONObject sendAgreementResponse = RestApiAgreements.sendAgreement(accessToken, sendAgreementJSONFileName, libraryDocumentId,
+      JSONObject sendAgreementResponse = RestApiAgreements.sendAgreement(accessToken, sendAgreementJSONFileName, libraryDocumentId, groupId,
                                                                          RestApiAgreements.DocumentIdentifierName.LIBRARY_DOCUMENT_ID);
 
       // Parse and read response.

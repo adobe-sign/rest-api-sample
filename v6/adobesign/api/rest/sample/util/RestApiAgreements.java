@@ -34,7 +34,7 @@ public class RestApiAgreements {
   private static final String TRANSIENT_DOCUMENTS_ENDPOINT = "/transientDocuments";
 
   private static final String FILEINFOS = "fileInfos";
-
+  private static final String GROUPID = "groupId";
   /**
    * Represents the various ways that a set of documents can be identified, depending on the context.
    */
@@ -100,6 +100,7 @@ public class RestApiAgreements {
    * @param requestJsonFile Name of the file containing the JSON structure used as the input for this API call.
    * @param documentId      Document ID of the document to be associated with the agreement. It can refer to a transient document or a library
    *                        document.
+   * @param groupId         The group used to send the agreement.
    * @param idName          Name by which to refer to a list containing document IDs when adding it to the input JSON structure. Must be one of
    *                        <ul>
    *                        <li>DocumentIdentifierName.TRANSIENT_DOCUMENT_IDS</li>
@@ -110,7 +111,7 @@ public class RestApiAgreements {
    * @see DocumentIdentifierName
    */
   @SuppressWarnings("unchecked")
-  public static JSONObject sendAgreement(String accessToken, String requestJsonFile, String documentId, DocumentIdentifierName idName) throws Exception {
+  public static JSONObject sendAgreement(String accessToken, String requestJsonFile, String documentId, String groupId, DocumentIdentifierName idName) throws Exception {
     // URL to invoke the agreements end point.
     String url = RestApiUtils.getBaseURIForAPI(accessToken) + AGREEMENTS_ENDPOINT;
 
@@ -135,6 +136,11 @@ public class RestApiAgreements {
         fileInfos.add(fileInfo);
         requestJson.put(FILEINFOS, fileInfos);
       }
+      if (groupId != null)
+      {
+        requestJson.put(GROUPID, groupId);
+      }
+
       responseJson = (JSONObject) RestApiUtils.makeApiCall(url, RestApiUtils.HttpRequestMethod.POST, headers, requestJson.toString());
     }
 

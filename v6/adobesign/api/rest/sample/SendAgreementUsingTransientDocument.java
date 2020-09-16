@@ -85,7 +85,7 @@ public class SendAgreementUsingTransientDocument {
 
     // Send an agreement using the transient document ID derived from above.
     DocumentIdentifierName idName = DocumentIdentifierName.TRANSIENT_DOCUMENT_ID;
-    JSONObject sendAgreementResponse = RestApiAgreements.sendAgreement(accessToken, sendAgreementJSONFileName, transientDocumentId, idName);
+    JSONObject sendAgreementResponse = RestApiAgreements.sendAgreement(accessToken, sendAgreementJSONFileName, transientDocumentId, null, idName);
 
     // Parse and read response.
     System.out.println("Agreement Sent. Agreement ID = " + sendAgreementResponse.get("id"));
