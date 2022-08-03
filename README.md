@@ -1,3 +1,6 @@
+**NOTE**: This SDK is deprecated. Please refer to https://opensource.adobe.com/acrobat-sign/sdks/. 
+
+
 # Adobe Sign REST API Sample
 
 Sample Java clients of Adobe Sign REST API that demonstrates how to use the API as well as some of its key capabilities. 
