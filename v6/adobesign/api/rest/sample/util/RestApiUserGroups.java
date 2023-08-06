@@ -1,6 +1,6 @@
 /*************************************************************************
  * ADOBE SYSTEMS INCORPORATED
- * Copyright 2018 Adobe Systems Incorporated
+ * Copyright 2020 Adobe Systems Incorporated
  * All Rights Reserved.
  * 
  * NOTICE: Adobe permits you to use, modify, and distribute this file in accordance with the
@@ -11,30 +11,27 @@
 
 package adobesign.api.rest.sample.util;
 
+import org.json.simple.JSONObject;
+
 import java.io.IOException;
 import java.util.HashMap;
 
-import org.json.simple.JSONObject;
-
 /**
- * Encapsulates calls to REST end points related to library documents.
+ * Encapsulates calls to REST end points related to users groups.
  */
-public class RestApiLibraryDocuments {
-  private static final String LIBRARY_DOCUMENTS_ENDPOINT = "/libraryDocuments";
+public class RestApiUserGroups {
+  private static final String userGroups = "/users/me/groups";
 
   /**
-   * Fetches the list of all library documents.
+   * Fetches the list of all active groups memberships of a user.
    * 
-   * @param accessToken access token of the user whose library documents are to be fetched.
-   * @param accessToken the group id to filter on
-   * @return JSON response containing the list of all the library documents for the user.
+   * @param accessToken access token of the user whose groups are to be fetched.
+   * @return JSON response containing the list of all the groups the user is a member of.
    * @throws IOException
    */
-  public static JSONObject getLibraryDocuments(String accessToken, String groupId) throws Exception {
+  public static JSONObject getUserGroups(String accessToken) throws Exception {
     // URL for library documents end point.
-    String url = RestApiUtils.getBaseURIForAPI(accessToken) + LIBRARY_DOCUMENTS_ENDPOINT;
-    if (groupId != null)
-      url+="?groupId" + groupId;
+    String url = RestApiUtils.getBaseURIForAPI(accessToken) + userGroups;
 
     // Create header list.
     HashMap<String, String> headers = new HashMap<String, String>();
